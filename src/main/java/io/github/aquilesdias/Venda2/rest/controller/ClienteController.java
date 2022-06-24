@@ -1,5 +1,6 @@
 package io.github.aquilesdias.Venda2.rest.controller;
 
+import ch.qos.logback.core.net.server.Client;
 import io.github.aquilesdias.Venda2.domain.Cliente;
 import io.github.aquilesdias.Venda2.repositories.ClienteRepository;
 import org.apache.coyote.Response;
@@ -50,6 +51,20 @@ public class ClienteController {
         return ResponseEntity.notFound().build();
     }
 
+    /*****REQUISIÇÕES PUT *****/
+    @PutMapping("{id}")
+    @ResponseBody
+    public ResponseEntity updateCliente(@PathVariable Integer id, @RequestBody Cliente cliente){
+
+        return clienteRepository
+                .findById(id)
+                .map( clienteExistente -> {
+                    cliente.setId(cliente.getId());
+                    clienteRepository.save(cliente);
+                    return ResponseEntity.noContent().build();
+                }).orElseGet(() -> ResponseEntity.notFound().build());
+
+    }
 
 
 
