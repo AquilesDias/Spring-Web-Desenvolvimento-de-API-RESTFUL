@@ -14,8 +14,11 @@ public class Venda2Application {
 	@Bean
 	CommandLineRunner commandLineRunner (@Autowired ClienteRepository clienteRepository){
 		return args -> {
-			Cliente cliente = new Cliente(null, "Flamengo");
-			clienteRepository.save(cliente);
+
+			clienteRepository.save(new Cliente(null, "Flamengo"));
+			clienteRepository.save(new Cliente(null, "Vasco"));
+			clienteRepository.save(new Cliente(null, "Fluminense"));
+
 		};
 	}
 
