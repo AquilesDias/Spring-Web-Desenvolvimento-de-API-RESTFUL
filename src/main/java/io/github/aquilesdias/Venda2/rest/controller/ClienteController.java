@@ -38,6 +38,18 @@ public class ClienteController {
         return ResponseEntity.ok(cliente1);
     }
 
+    /*****REQUISIÇÕES DELETE *****/
+    @DeleteMapping("{id}")
+    @ResponseBody
+    public ResponseEntity deleteCliente(@PathVariable Integer id){
+        Optional<Cliente> existCliente = clienteRepository.findById(id);
+        if(existCliente.isPresent()){
+            clienteRepository.delete( existCliente.get());
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 
 
 
