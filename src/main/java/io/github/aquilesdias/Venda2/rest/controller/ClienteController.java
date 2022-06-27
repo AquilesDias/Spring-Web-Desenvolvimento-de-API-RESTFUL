@@ -1,18 +1,18 @@
 package io.github.aquilesdias.Venda2.rest.controller;
 
-import ch.qos.logback.core.net.server.Client;
 import io.github.aquilesdias.Venda2.domain.Cliente;
 import io.github.aquilesdias.Venda2.repositories.ClienteRepository;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.Resource;
-import java.util.Optional;
+import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
 
@@ -20,54 +20,61 @@ public class ClienteController {
     private ClienteRepository clienteRepository;
 
 
-    /*****REQUISIÇÕES GET *****/
+    /***** REQUISIÇÕES GET *****/
     @GetMapping("/{id}")
-    @ResponseBody
-    public ResponseEntity findByClienteId(@PathVariable Integer id){
-        Optional<Cliente> existId = clienteRepository.findById(id);
-        if(existId.isPresent()){
-            return ResponseEntity.ok( existId.get());
-        }
-        return ResponseEntity.notFound().build();
+    public Cliente findByClienteId(@PathVariable Integer id){
+       return clienteRepository
+               .findById(id)
+               .orElseThrow(() ->
+               new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não existe com esse Id!"));
     }
 
-    /*****REQUISIÇÕES POST *****/
+    @GetMapping
+    public List<Cliente> find(Cliente clienteFiltro){
+
+        ExampleMatcher exampleMatcher = ExampleMatcher
+                .matching()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Example example = Example.of(clienteFiltro, exampleMatcher);
+
+        return clienteRepository.findAll(example);
+    }
+
+    /***** REQUISIÇÕES POST *****/
     @PostMapping
-    @ResponseBody
-    public ResponseEntity saveCliente( @RequestBody Cliente cliente){
-        Cliente cliente1 = clienteRepository.save(cliente);
-        return ResponseEntity.ok(cliente1);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Cliente saveCliente( @RequestBody Cliente cliente){
+       return clienteRepository.save(cliente);
     }
 
-    /*****REQUISIÇÕES DELETE *****/
+    /***** REQUISIÇÕES DELETE *****/
     @DeleteMapping("{id}")
-    @ResponseBody
-    public ResponseEntity deleteCliente(@PathVariable Integer id){
-        Optional<Cliente> existCliente = clienteRepository.findById(id);
-        if(existCliente.isPresent()){
-            clienteRepository.delete( existCliente.get());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Cliente deleteCliente(@PathVariable Integer id){
+       return clienteRepository
+               .findById(id)
+               .map(cliente -> { clienteRepository.delete(cliente);
+                   return cliente;
+               })
+               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 
-    /*****REQUISIÇÕES PUT *****/
+    /***** REQUISIÇÕES PUT *****/
     @PutMapping("{id}")
-    @ResponseBody
-    public ResponseEntity updateCliente(@PathVariable Integer id, @RequestBody Cliente cliente){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Cliente updateCliente(@PathVariable Integer id, @RequestBody Cliente cliente) {
 
         return clienteRepository
                 .findById(id)
-                .map( clienteExistente -> {
+                .map(clienteExistente -> {
                     cliente.setId(cliente.getId());
                     clienteRepository.save(cliente);
-                    return ResponseEntity.noContent().build();
-                }).orElseGet(() -> ResponseEntity.notFound().build());
+                    return clienteExistente;
+                }).orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
 
     }
-
-
-
-
 
 }

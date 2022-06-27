@@ -15,9 +15,9 @@ public class Venda2Application {
 	CommandLineRunner commandLineRunner (@Autowired ClienteRepository clienteRepository){
 		return args -> {
 
-			clienteRepository.save(new Cliente(null, "Flamengo"));
-			clienteRepository.save(new Cliente(null, "Vasco"));
-			clienteRepository.save(new Cliente(null, "Fluminense"));
+			clienteRepository.save(new Cliente(null, "Flamengo", "11111116111"));
+			clienteRepository.save(new Cliente(null, "Vasco", "11211111111"));
+			clienteRepository.save(new Cliente(null, "Fluminense", "11111111311"));
 
 		};
 	}
