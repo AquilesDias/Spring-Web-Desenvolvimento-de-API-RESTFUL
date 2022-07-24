@@ -1,5 +1,6 @@
 package io.github.aquilesdias.Venda2.rest.controller;
 
+import io.github.aquilesdias.Venda2.exception.PedidoNaoEncontradoException;
 import io.github.aquilesdias.Venda2.exception.RegraDeNegocioException;
 import io.github.aquilesdias.Venda2.rest.ApiErrors;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,12 @@ public class ApplicationControllerAdvice {
     public ApiErrors handleRegraNegocioException(RegraDeNegocioException ex){
         String message = ex.getMessage();
         return new ApiErrors(message);
+    }
+
+    @ExceptionHandler(PedidoNaoEncontradoException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiErrors handlePedidoNaoEncontradoException(PedidoNaoEncontradoException ex){
+        return new ApiErrors(ex.getMessage());
     }
 
 }

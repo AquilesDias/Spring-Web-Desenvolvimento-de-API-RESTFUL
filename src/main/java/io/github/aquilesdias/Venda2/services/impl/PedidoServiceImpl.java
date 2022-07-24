@@ -4,6 +4,8 @@ import io.github.aquilesdias.Venda2.domain.Cliente;
 import io.github.aquilesdias.Venda2.domain.ItemPedido;
 import io.github.aquilesdias.Venda2.domain.Pedido;
 import io.github.aquilesdias.Venda2.domain.Produto;
+import io.github.aquilesdias.Venda2.domain.enums.StatusPedido;
+import io.github.aquilesdias.Venda2.exception.PedidoNaoEncontradoException;
 import io.github.aquilesdias.Venda2.exception.RegraDeNegocioException;
 import io.github.aquilesdias.Venda2.repositories.ClienteRepository;
 import io.github.aquilesdias.Venda2.repositories.ItemPedidoRepository;
@@ -49,6 +51,7 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setTotal(pedidoDTO.getTotal());
         pedido.setDataPedido(LocalDate.now());
         pedido.setCliente(cliente);
+        pedido.setStatus(StatusPedido.REALIZADO);
 
         List<ItemPedido> itemPedidos = converterItems(pedido, pedidoDTO.getItems());
         pedidoRepository.save(pedido);
@@ -61,6 +64,17 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public Optional<Pedido> obterPedidoCompleto(Integer id) {
          return pedidoRepository.findByIdFetchItens(id);
+    }
+
+    @Override
+    @Transactional
+    public void atualizarStatus(Integer id, StatusPedido statusPedido) {
+        pedidoRepository
+                .findById(id)
+                .map(pedido -> {
+                    pedido.setStatus(statusPedido);
+                    return pedidoRepository.save(pedido);
+                }).orElseThrow(() -> new PedidoNaoEncontradoException());
     }
 
     private List<ItemPedido> converterItems(Pedido pedido, List<ItemPedidoDTO> items){

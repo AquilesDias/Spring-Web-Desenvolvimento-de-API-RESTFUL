@@ -2,6 +2,8 @@ package io.github.aquilesdias.Venda2.rest.controller;
 
 import io.github.aquilesdias.Venda2.domain.ItemPedido;
 import io.github.aquilesdias.Venda2.domain.Pedido;
+import io.github.aquilesdias.Venda2.domain.enums.StatusPedido;
+import io.github.aquilesdias.Venda2.rest.dto.AtualizacaoStatusPedidoDTO;
 import io.github.aquilesdias.Venda2.rest.dto.InformacaoItemPedidoDTO;
 import io.github.aquilesdias.Venda2.rest.dto.InformacoesPedidoDTO;
 import io.github.aquilesdias.Venda2.rest.dto.PedidoDTO;
@@ -43,12 +45,21 @@ public class PedidoController {
                          new ResponseStatusException(NOT_FOUND, "Pedido não encontrado"));
     }
 
+    @PatchMapping("{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void updateStatus(@PathVariable Integer id, @RequestBody AtualizacaoStatusPedidoDTO statusDTO){
+        String novaStatus = statusDTO.getNovoStatus();
+        pedidoService.atualizarStatus(id, StatusPedido.valueOf(novaStatus));
+
+    }
+
     private InformacoesPedidoDTO converter(Pedido pedido) {
            return InformacoesPedidoDTO.builder()
                     .codigo(pedido.getId())
                     .cpf(pedido.getCliente().getCpf())
                     .nomeCliente(pedido.getCliente().getNome())
                     .total(pedido.getTotal())
+                    .status(pedido.getStatus().name())
                     .dataPedido(pedido.getDataPedido().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                     .items(converter(pedido.getItens()))
                     .build();
